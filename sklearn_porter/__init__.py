@@ -15,10 +15,10 @@ def _load_meta(path):
     :param path: The path to pypi.json
     :return: Dictionary of key value pairs.
     """
-    with open(path) as f:
-        meta = load(f, encoding='utf-8')
-        meta = {k: v.decode('utf-8') if isinstance(v, bytes) else v
-                for k, v in meta.items()}
+    with open(path, 'r', encoding='utf-8') as f:
+        meta = load(f)
+        meta = {k: v.decode('utf-8') if isinstance(v, bytes) else str(v)
+                    for k, v in meta.items()}
 
         src_dir = abspath(dirname(path))
 

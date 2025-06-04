@@ -16,31 +16,28 @@ def _load_meta(path):
     :param path: The path to pypi.json
     :return: Dictionary of key value pairs.
     """
-    with open(path) as f:
-        meta = load(f, encoding='utf-8')
-        meta = {k: v.decode('utf-8') if isinstance(v, bytes) else v
+    with open(path, 'r', encoding='utf-8') as f:
+        meta = load(f)
+        meta = {k: v.decode('utf-8') if isinstance(v, bytes) else str(v)
                 for k, v in meta.items()}
 
         src_dir = abspath(dirname(path))
 
-        if 'requirements' in meta and \
-                str(meta['requirements']).startswith('file://'):
-            req_path = str(meta['requirements'])[7:]
-            req_path = join(src_dir, req_path)
+        if 'requirements' in meta and str(meta['requirements']).startswith('file://'):
+            req_path = join(src_dir, meta['requirements'][7:])
             if exists(req_path):
-                reqs = open(req_path, 'r', encoding='utf-8').read().strip().split('\n')
-                reqs = [req.strip() for req in reqs if 'git+' not in req]
-                meta['requirements'] = reqs
+                with open(req_path, 'r', encoding='utf-8') as req_file:
+                    reqs = req_file.read().strip().split('\n')
+                    reqs = [req.strip() for req in reqs if 'git+' not in req]
+                    meta['requirements'] = reqs
             else:
                 meta['requirements'] = ''
 
-        if 'long_description' in meta and \
-                str(meta['long_description']).startswith('file://'):
-            readme_path = str(meta['long_description'])[7:]
-            readme_path = join(src_dir, readme_path)
+        if 'long_description' in meta and str(meta['long_description']).startswith('file://'):
+            readme_path = join(src_dir, meta['long_description'][7:])
             if exists(readme_path):
-                readme = open(readme_path, 'r', encoding='utf-8').read().strip()
-                meta['long_description'] = readme
+                with open(readme_path, 'r', encoding='utf-8') as readme_file:
+                    meta['long_description'] = readme_file.read().strip()
             else:
                 meta['long_description'] = ''
 
